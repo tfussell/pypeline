@@ -1,29 +1,30 @@
 #!/usr/local/bin/python3
 
 class PyPipeline:
-    def run(self, num_cores, gui=False):
+    def run(self, num_cores, use_gui=False):
         import core.temp
         import core.scriptgenerator
         import core.scriptrunner
         import gui.options
 
-        with core.temp.tempdir() as temporary_directory:
-            script_generator = core.scriptgenerator.ScriptGenerator({'temporary_directory' : temporary_directory})
-            scripts = script_generator.generate()
+        options = {'temporary_directory' : '../Output/Intermediate/'}
 
-            if gui:
-                options = gui.options.OptionsWindow(scripts).get_options()
-            else:
-                options = {'input_directory' : '../Input'}
+        if use_gui:
+            options = gui.options.OptionsWindow(scripts).get_options()
+        else:
+            options['input_directory'] = '../Input'
 
-            options['temporary_directory'] = temporary_directory
+        script_generator = core.scriptgenerator.ScriptGenerator(options)
+        scripts = script_generator.generate()
 
-            script_runner = core.scriptrunner.ParallelScriptRunner(scripts, num_cores)
+        script_runner = core.scriptrunner.ParallelScriptRunner(scripts, num_cores)
 
-            if gui:
-                gui.viewer.ScriptRunnerViewer(script_runner).start()
-            else:
-                script_runner.run()
+        print('Using options:', options)
+
+        if use_gui:
+            gui.viewer.ScriptRunnerViewer(script_runner).start()
+        else:
+            script_runner.run()
 
 if __name__ == '__main__':
-    PyPipeline().run(1, True)
+    PyPipeline().run(1, False)

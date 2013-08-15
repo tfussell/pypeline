@@ -29,6 +29,8 @@ class ScriptGenerator(object):
             script.load_pipeline(pipeline)
             scripts.append(script)
 
+        print('Scripts:', files)
+
         return scripts
 
     def find_files(self, directory, suffix):
