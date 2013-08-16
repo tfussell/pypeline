@@ -5,8 +5,11 @@ from core.script import Script
 
 class ScriptGenerator(object):
     def __init__(self, options):
-        self.input_directory = '../Input'
-        self.temporary_directory = options['temporary_directory']
+        self.input_directory = options['input']
+        self.working_directory = options['output'] + os.sep + 'Intermediate'
+        self.pipeline = options['pipeline']
+        self.query = options['query']
+        self.output_directory = options['output']
 
     def generate(self):
         files = self.find_files(self.input_directory, '.fastq')
@@ -17,16 +20,11 @@ class ScriptGenerator(object):
         for file in files:
             root = file.split(os.sep)[-1]
 
-            directory = self.temporary_directory + os.sep + root
+            directory = self.working_directory + os.sep + root
 
-            script = Script(root, directory)
+            script = Script(root, directory, self.query, self.input_directory, self.output_directory)
             
-            if sys.version_info < (3, 0):
-                pipeline = raw_input('Pipeline for "' + root + '"?: ')
-            else:
-                pipeline = input('Pipeline for "' + root + '"?: ')
-
-            script.load_pipeline(pipeline)
+            script.load_pipeline(self.pipeline)
             scripts.append(script)
 
         print('Scripts:', files)

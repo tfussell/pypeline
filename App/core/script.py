@@ -10,13 +10,16 @@ Message = collections.namedtuple('Message', 'task_name type value')
 MESSAGE_INDICATOR = '$+_pypipeline_+$'
 
 class Script(object):
-    def __init__(self, name, directory):
+    def __init__(self, name, directory, query, input_directory, output_directory):
         self.name = name
         self.commands = []
         self.working_directory = directory
+        self.query = query
+        self.input_directory = input_directory
+        self.output_directory = input_directory
         
     def execute(self, message_queue):
-        outfile = open('..' + os.sep + 'Output' + os.sep + 'Logs' + os.sep + self.name + '.log', 'w')
+        outfile = open(self.working_directory + os.sep + self.name + '.log', 'w')
         process = subprocess.Popen(''.join(self.commands), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, bufsize=1, cwd=self.working_directory)
 
         while process.poll() == None:
@@ -43,7 +46,9 @@ class Script(object):
     def query_parameters(self, parameters):
         for key in parameters:
             if not parameters[key]:
-                if sys.version_info < (3, 0):
+                if key == 'query':
+                    parameters[key] = self.query
+                elif sys.version_info < (3, 0):
                     parameters[key] = raw_input(self.name + ', ' + key + ': ')
                 else:
                     parameters[key] = input(self.name + ', ' + key + ': ')
@@ -53,7 +58,7 @@ class Script(object):
     def load_pipeline(self, pipeline):
         script_template_filename = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'script'
         parameters_filename = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'parameters'
-        template_directory = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'Template'
+        template_directory = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'template'
 
         if (not os.path.isfile(script_template_filename) and
             not os.path.isfile(parameters_filename)):
@@ -72,13 +77,13 @@ class Script(object):
         # Special parameters
         template_variables['name'] = self.name
         template_variables['directory'] = self.working_directory
-        template_variables['input_directory'] = os.path.abspath(os.path.dirname(sys.argv[0])) + os.sep + '..' + os.sep + 'Input'
-        template_variables['output_directory'] = os.path.abspath(os.path.dirname(sys.argv[0])) + os.sep + '..' + os.sep + 'Output'
+        template_variables['input_directory'] = self.input_directory
+        template_variables['output_directory'] = self.output_directory
 
         self.commands = [self.template_replace(command, template_variables) for command in template_script]
         
         for i in range(len(self.commands)):
-            self.commands.insert(i * 2, 'echo {} {}\n'.format(MESSAGE_INDICATOR, i))
+            self.commands.insert(i * 2, 'echo {} {} {}\n'.format(MESSAGE_INDICATOR, i, self.commands[i * 2]))
 
         if not os.path.isdir(self.working_directory):
             if template_directory and os.path.isdir(template_directory):

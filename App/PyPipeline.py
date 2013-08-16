@@ -1,30 +1,38 @@
 #!/usr/local/bin/python3
 
 class PyPipeline:
-    def run(self, num_cores, use_gui=False):
+    def run(self, options):
         import core.temp
         import core.scriptgenerator
         import core.scriptrunner
         import gui.options
 
-        options = {'temporary_directory' : '../Output/Intermediate/'}
-
-        if use_gui:
-            options = gui.options.OptionsWindow(scripts).get_options()
-        else:
-            options['input_directory'] = '../Input'
-
         script_generator = core.scriptgenerator.ScriptGenerator(options)
         scripts = script_generator.generate()
 
-        script_runner = core.scriptrunner.ParallelScriptRunner(scripts, num_cores)
-
+        script_runner = core.scriptrunner.ParallelScriptRunner(scripts, int(options['numproc']))
+                                                               
         print('Using options:', options)
+        script_runner.run()
 
-        if use_gui:
-            gui.viewer.ScriptRunnerViewer(script_runner).start()
+def parse_args(argv):
+    args = {'numproc': 1,
+            'input': '../Input',
+            'output': '../Output',
+            'pipeline': 'denovo',
+            'query': 'Callorhinchus_milii'}
+
+    user_args = dict(i.split('=') for i in argv[1:] if i.find('=') > 0)
+
+    for key in user_args:
+        if key in args:
+            args[key] = user_args[key]
         else:
-            script_runner.run()
+            print('Unknown argument:',key)            
+
+    return args
 
 if __name__ == '__main__':
-    PyPipeline().run(1, False)
+    import sys
+    args = parse_args(sys.argv)
+    PyPipeline().run(args)

@@ -1,0 +1,7 @@
+input_files (.+)_R1.fastq
+trimgalore_bin /home/thomas/Development/PyPipeline/Software/trim_galore_v0.2.3/trim_galore
+abyss_bin /home/thomas/Development/PyPipeline/Software/abyss-1.3.6/bin/abyss-pe
+adapter_one AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
+adapter_two AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+kmer 64
+query
