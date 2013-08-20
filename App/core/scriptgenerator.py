@@ -27,11 +27,12 @@ class ScriptGenerator(object):
             script.load_pipeline(self.pipeline)
             scripts.append(script)
 
-        print('Scripts:', files)
-
         return scripts
 
     def find_files(self, directory, suffix):
+        if not os.path.isdir(directory):
+            print('Error - Invalid input directory: ' + directory)
+            sys.exit(1)
         all_files = os.listdir(directory)
         files = [f[:-len('_R1' + suffix)] for f in all_files]
 

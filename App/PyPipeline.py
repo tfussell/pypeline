@@ -2,21 +2,18 @@
 
 class PyPipeline:
     def run(self, options):
-        import core.temp
         import core.scriptgenerator
         import core.scriptrunner
-        import gui.options
 
         script_generator = core.scriptgenerator.ScriptGenerator(options)
         scripts = script_generator.generate()
 
         script_runner = core.scriptrunner.ParallelScriptRunner(scripts, int(options['numproc']))
                                                                
-        print('Using options:', options)
         script_runner.run()
 
 def parse_args(argv):
-    args = {'numproc': 1,
+    args = {'numproc': '1',
             'input': '../Input',
             'output': '../Output',
             'pipeline': 'denovo',

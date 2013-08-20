@@ -1,4 +1,3 @@
-pwd
 echo {% input_directory %}
 cp {% input_directory %}/{% name %}_R1.fastq ./
 cp {% input_directory %}/{% name %}_R2.fastq ./
