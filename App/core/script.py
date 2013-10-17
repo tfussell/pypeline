@@ -19,8 +19,8 @@ class Script(object):
         self.output_directory = input_directory
         
     def execute(self, message_queue):
-        outfile = open(self.working_directory + os.sep + self.name + '.log', 'w')
-        print(''.join(self.commands))
+        outfile = open(self.working_directory + os.sep + self.name + '.log', 'wb')
+
         process = subprocess.Popen(''.join(self.commands), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, bufsize=1, cwd=self.working_directory)
 
         while process.poll() == None:
@@ -29,7 +29,7 @@ class Script(object):
             if line[:len(MESSAGE_INDICATOR)] == MESSAGE_INDICATOR:
                 print(line[len(MESSAGE_INDICATOR) + 1:-1])
             elif line and outfile:
-                outfile.write(line)
+                outfile.write(line.encode('utf-8'))
 
         outfile.close()
 
@@ -86,7 +86,7 @@ class Script(object):
         num_commands = len(self.commands)
 
         for i in range(len(self.commands)):
-            self.commands.insert(i * 2, 'echo {} {} {}/{}: {}\n'.format(MESSAGE_INDICATOR, self.name, i, num_commands, self.commands[i * 2]))
+            self.commands.insert(i * 2, 'echo {} {} {}/{}: "{}"\n'.format(MESSAGE_INDICATOR, self.name, i, num_commands, self.commands[i * 2]))
 
         if not os.path.isdir(self.working_directory):
             if template_directory and os.path.isdir(template_directory):
