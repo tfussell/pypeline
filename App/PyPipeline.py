@@ -8,15 +8,18 @@ class PyPipeline:
         script_generator = core.scriptgenerator.ScriptGenerator(options)
         scripts = script_generator.generate()
 
-        script_runner = core.scriptrunner.ParallelScriptRunner(scripts, int(options['numproc']))
-                                                               
+        script_runner = core.scriptrunner.ParallelScriptRunner(scripts, int(options['numproc']))                                                               
         script_runner.run()
 
 def parse_args(argv):
-    args = {'numproc': '1',
+    import subprocess
+    numproc = int(subprocess.check_output(['sysctl', '-n', 'hw.physicalcpu']))
+
+    import os
+    args = {'numproc': numproc,
             'input': '../Input',
             'output': '../Output',
-            'pipeline': 'denovo',
+            'pipeline': 'denovota',
             'query': 'Callorhinchus_milii'}
 
     user_args = dict(i.split('=') for i in argv[1:] if i.find('=') > 0)
@@ -26,6 +29,9 @@ def parse_args(argv):
             args[key] = user_args[key]
         else:
             print('Unknown argument:',key)            
+
+    args['input'] = os.path.abspath(args['input'])
+    args['output'] = os.path.abspath(args['output'])
 
     return args
 

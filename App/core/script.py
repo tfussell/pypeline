@@ -16,7 +16,7 @@ class Script(object):
         self.working_directory = directory
         self.query = query
         self.input_directory = input_directory
-        self.output_directory = input_directory
+        self.output_directory = output_directory
         
     def execute(self, message_queue):
         outfile = open(self.working_directory + os.sep + self.name + '.log', 'wb')
@@ -56,14 +56,22 @@ class Script(object):
 
         return parameters
 
+    def shorten_name(self, name):
+        split = name.split('_')
+        if len(split) > 1 and split[1][:2] == 'GN':
+            return '_'.join(split[:2])
+        return split[0]
+
     def load_pipeline(self, pipeline):
-        script_template_filename = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'script'
-        parameters_filename = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'parameters'
-        template_directory = '..' + os.sep + 'Pipelines' + os.sep + pipeline + os.sep + 'template'
+        dir = os.path.dirname(__file__)
+        script_template_filename = os.path.abspath(dir + os.sep + '..' + os.sep + '..' + os.sep + 'Pipelines') + os.sep + pipeline + os.sep + 'script'
+        parameters_filename = os.path.abspath(dir + os.sep + '..' + os.sep + '..' + os.sep + 'Pipelines') + os.sep + pipeline + os.sep + 'parameters'
+        template_directory = os.path.abspath(dir + os.sep + '..' + os.sep + '..' + os.sep + 'Pipelines') + os.sep + pipeline + os.sep + 'template'
 
         if (not os.path.isfile(script_template_filename) and
             not os.path.isfile(parameters_filename)):
-            raise Error('Files "script" and "parameters" not found for the given pipeline')
+            print('Files "script" and "parameters" not found for the given pipeline')
+            raise Exception
 
         script_template_file = open(script_template_filename, 'r')
         template_script = list(script_template_file)
@@ -77,6 +85,19 @@ class Script(object):
 
         # Special parameters
         template_variables['name'] = self.name
+        template_variables['first'] = self.name + '_R1'
+        if not os.path.isfile(self.input_directory + os.sep + template_variables['first'] + '.fastq'):
+            template_variables['first'] = self.name + '_R1_001'
+        if not os.path.isfile(self.input_directory + os.sep + template_variables['first'] + '.fastq'):
+            print('error: first input file not found:', self.input_directory + os.sep + self.name + '_R1[_001].fastq')
+            return
+        template_variables['second'] = self.name + '_R2'
+        if not os.path.isfile(self.input_directory + os.sep + template_variables['second'] + '.fastq'):
+            template_variables['second'] = self.name + '_R2_001'
+        if not os.path.isfile(self.input_directory + os.sep + template_variables['second'] + '.fastq'):
+            print('error: second input file not found:', self.input_directory + os.sep + self.name + '_R2[_001].fastq')
+            return
+        template_variables['name_shortened'] = self.shorten_name(self.name)
         template_variables['directory'] = self.working_directory
         template_variables['input_directory'] = self.input_directory
         template_variables['output_directory'] = self.output_directory

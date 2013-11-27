@@ -1,7 +1,7 @@
-cp {% input_directory %}/{% name %}_R1.fastq ./
-cp {% input_directory %}/{% name %}_R2.fastq ./
-{% trimgalore_bin %} -a {% adapter_one %} -a2 {% adapter_two %} --paired {% name %}_R1.fastq {% name %}_R2.fastq
+cp {% input_directory %}/{% first %}.fastq ./
+cp {% input_directory %}/{% second %}.fastq ./
+{% trimgalore_bin %} -a {% adapter_one %} -a2 {% adapter_two %} --paired {% first %}.fastq {% second %}
 mkdir trans_abyss_fem
-source ~/Desktop/PyPipeline/Software/trans-ABySS-v1.4.4/setup.sh; export k; for k in $(seq 51 10 131); do mkdir k$k; {% abyss_bin %} -C k$k s=150 n=5 k=$k in='../{% name %}_R1_val_1.fq  ../{% name %}_R2_val_2.fq' name={% name %}; mkdir trans_abyss_fem/k$k; ~/Desktop/PyPipeline/Software/trans-ABySS-v1.4.4/wrappers/abyss-ta-filter -i ./k$k -k $k -n {% name %} -o trans_abyss_fem/k$k -l 151; done
+source ~/Desktop/PyPipeline/Software/trans-ABySS-v1.4.4/setup.sh; export k; for k in $(seq 51 10 131); do mkdir k$k; {% abyss_bin %} -C k$k s=150 n=5 k=$k in='../{% first %}_val_1.fq  ../{% second %}_val_2.fq' name={% name %}; mkdir trans_abyss_fem/k$k; ~/Desktop/PyPipeline/Software/trans-ABySS-v1.4.4/wrappers/abyss-ta-filter -i ./k$k -k $k -n {% name %} -o trans_abyss_fem/k$k -l 151; done
 ~/Desktop/PyPipeline/Software/trans-ABySS-v1.4.4/wrappers/abyss-rmdups-iterative -i trans_abyss_fem -n {% name %} -o ./trans_abyss_fem
-cp trans_abyss_fem/{% name %}-contigs.fa {% output_directory %}/{% name_shortened %}.fa
+cp trans_abyss_fem/{% name %}-contigs.fa {% output_directory %}/{% name_shortened %}-contigs.fa

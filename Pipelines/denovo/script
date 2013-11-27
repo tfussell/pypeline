@@ -1,9 +1,0 @@
-echo {% input_directory %}
-cp {% input_directory %}/{% name %}_R1.fastq ./
-cp {% input_directory %}/{% name %}_R2.fastq ./
-{% trimgalore_bin %} -a {% adapter_one %} -a2 {% adapter_two %} --paired {% name %}_R1.fastq {% name %}_R2.fastq
-{% abyss_bin %} k={% kmer %} in='{% name %}_R1_val_1.fq  {% name %}_R2_val_2.fq' name={% name %}
-cp {% name %}-scaffolds.fa bingene/abyssout/{% name %}.fas
-cd bingene/scripts
-./bingene.pl -query="{% query %}" -subject="{% name %}" -mk -b
-mv ../genebin/{% query %}.result {% output_directory %}/{% name %}
